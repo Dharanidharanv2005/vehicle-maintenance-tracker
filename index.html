@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_button %}
+
+{% block title %}Maintenance History - Vehicle Maintenance Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Maintenance History</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="col text-end">
+        {{ back_button() }}
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary" id="exportBtn">
+                <i class="fas fa-download"></i> Export History
+            </button>
+            <button type="button" class="btn btn-outline-primary" id="printBtn">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Records</h5>
+                <p class="card-text display-6">{{ maintenance_records|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Cost</h5>
+                <p class="card-text display-6">${{ "%.2f"|format(total_cost) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Vehicles</h5>
+                <p class="card-text display-6">{{ vehicles|length }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Maintenance Records -->
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="card-title mb-4">All Maintenance Records</h2>
+        <div class="table-responsive">
+            <table class="table table-hover" id="maintenanceTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Vehicle</th>
+                        <th>Service Type</th>
+                        <th>Mileage</th>
+                        <th>Cost</th>
+                        <th>Next Service</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in maintenance_records %}
+                        <tr>
+                            <td>{{ record.service_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('vehicle_details', vehicle_id=record.vehicle.id) }}">
+                                    {{ record.vehicle.make }} {{ record.vehicle.model }}
+                                </a>
+                            </td>
+                            <td>{{ record.service_type.name }}</td>
+                            <td>{{ record.mileage }}</td>
+                            <td>${{ "%.2f"|format(record.cost) if record.cost else 'N/A' }}</td>
+                            <td>
+                                {% if record.next_service_date %}
+                                    {{ record.next_service_date.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.next_service_date %}
+                                    {% if record.next_service_date < now.date() %}
+                                        <span class="badge bg-danger">Overdue</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Upcoming</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-secondary">N/A</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Vehicle-wise Breakdown -->
+<div class="row mt-4">
+    {% for vehicle_key, vehicle_data in vehicles.items() %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title h5">
+                        <a href="{{ url_for('vehicle_details', vehicle_id=vehicle_data.id) }}" class="text-decoration-none">
+                            {{ vehicle_data.make }} {{ vehicle_data.model }}
+                        </a>
+                    </h3>
+                    <p class="text-muted">{{ vehicle_data.license_plate }}</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Service</th>
+                                    <th>Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in vehicle_data.records[:5] %}
+                                    <tr>
+                                        <td>{{ record.service_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ record.service_type.name }}</td>
+                                        <td>${{ "%.2f"|format(record.cost) if record.cost else 'N/A' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if vehicle_data.records|length > 5 %}
+                        <a href="{{ url_for('vehicle_details', vehicle_id=vehicle_data.id) }}" class="btn btn-link btn-sm">
+                            View all {{ vehicle_data.records|length }} records
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('exportBtn').addEventListener('click', function() {
+    // Create CSV content
+    let csv = 'Date,Vehicle,Service Type,Mileage,Cost,Next Service\n';
+    const table = document.getElementById('maintenanceTable');
+    const rows = table.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const rowData = Array.from(cells).map(cell => {
+            // Remove any HTML tags and quotes
+            let text = cell.textContent.trim();
+            // Escape quotes and wrap in quotes if contains comma
+            if (text.includes(',')) {
+                text = `"${text.replace(/"/g, '""')}"`;
+            }
+            return text;
+        });
+        csv += rowData.join(',') + '\n';
+    });
+    
+    // Create and trigger download
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'maintenance_history.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
+
+document.getElementById('printBtn').addEventListener('click', function() {
+    window.print();
+});
+</script>
+{% endblock %} 

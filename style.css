@@ -1,0 +1,238 @@
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Card Styles */
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 5px;
+    padding: 0.5rem 1.5rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Table Styles */
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Navigation Styles */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 5px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Footer Styles */
+.footer {
+    margin-top: auto;
+    background-color: #f8f9fa;
+    padding: 1rem 0;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom Classes */
+.shadow-sm {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.shadow {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom Form Elements */
+.form-select {
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+
+.form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+
+/* Breadcrumb Styles */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+}
+
+/* Custom Card Header */
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 1rem;
+}
+
+/* Custom List Group */
+.list-group-item {
+    border: none;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.list-group-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Print Styles */
+@media print {
+    /* Hide elements not needed in print */
+    .navbar,
+    .btn-group,
+    .footer,
+    .btn-close {
+        display: none !important;
+    }
+
+    /* Adjust layout for print */
+    .container {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Ensure tables fit on page */
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    /* Adjust card styles for print */
+    .card {
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+    }
+
+    .card-body {
+        padding: 1rem !important;
+    }
+
+    /* Ensure text is black for better printing */
+    body {
+        color: #000 !important;
+        background: #fff !important;
+    }
+
+    /* Adjust link colors for print */
+    a {
+        color: #000 !important;
+        text-decoration: none !important;
+    }
+
+    /* Ensure badges are visible in print */
+    .badge {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+        background: #fff !important;
+    }
+
+    /* Add page breaks where appropriate */
+    .card {
+        page-break-inside: avoid;
+    }
+
+    /* Add title to printed page */
+    .container::before {
+        content: "Vehicle Maintenance History";
+        display: block;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Add date to printed page */
+    .container::after {
+        content: "Printed on: " attr(data-print-date);
+        display: block;
+        font-size: 12px;
+        text-align: right;
+        margin-top: 20px;
+    }
+} 

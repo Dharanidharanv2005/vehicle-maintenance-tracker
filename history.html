@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_button %}
+
+{% block title %}Maintenance History - Vehicle Maintenance Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Maintenance History</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="col text-end">
+        {{ back_button() }}
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h3 class="card-title mb-4">Maintenance History</h3>
+        {% if maintenance_records %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Service Date</th>
+                            <th>Vehicle</th>
+                            <th>Service Type</th>
+                            <th>Mileage</th>
+                            <th>Cost</th>
+                            <th>Next Service Date</th>
+                            <th>Service Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in maintenance_records %}
+                        <tr>
+                            <td>{{ record.service_date.strftime('%Y-%m-%d') if record.service_date else 'N/A' }}</td>
+                            <td>{{ record.vehicle.make }} {{ record.vehicle.model }}</td>
+                            <td>{{ record.service_type.name }}</td>
+                            <td>{{ record.mileage }}</td>
+                            <td>${{ "%.2f"|format(record.cost) if record.cost else 'N/A' }}</td>
+                            <td>
+                                {% if record.next_service_date %}
+                                    {{ record.next_service_date.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.next_service_date %}
+                                    {% if record.next_service_date < now.date() %}
+                                        <span class="badge bg-danger">Overdue</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Upcoming</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-secondary">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('update_maintenance', record_id=record.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3">
+                <strong>Total Cost: ${{ "%.2f"|format(total_cost) }}</strong>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <p class="mb-0">No maintenance records found.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
